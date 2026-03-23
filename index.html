@@ -1065,9 +1065,7 @@
 
         window.triggerHtml2Canvas = function() {
             window.showToast("Generating slide...");
-            
-            // Wait for any appended elements (like SVG) to paint
-            setTimeout(() => {
+            requestAnimationFrame(() => {
                 html2canvas(document.getElementById('slide-staging-area'), {
                     scale: 2,
                     backgroundColor: window.isDarkMode ? '#141414' : '#ffffff',
@@ -1076,7 +1074,13 @@
                 }).then(canvas => {
                     const dataUrl = canvas.toDataURL('image/png');
                     
-                    const inIframe = window.self !== window.top;
+                    // Secure iframe detection (Confluence cross-origin safety)
+                    let inIframe = false;
+                    try {
+                        inIframe = window.self !== window.top;
+                    } catch (e) {
+                        inIframe = true; // Cross-origin error means we are definitely in an iframe
+                    }
                     
                     if (inIframe) {
                         document.getElementById('fallback-download-img').src = dataUrl;
@@ -1094,7 +1098,7 @@
                     console.error('Slide generation error:', err);
                     window.showToast("Failed to generate slide.", "error");
                 });
-            }, 100);
+            });
         };
 
         // --- Interaction Logic: Tooltips, Zoom, Fullscreen ---
