@@ -5,17 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ModelOp Custom Monitor Quickstart Guide</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Viz.js (Graphviz) for ERD and Pathways -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/viz.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/full.render.js"></script>
-    <!-- HTML2Canvas for Slide Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- Google Fonts & Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 
@@ -78,6 +73,9 @@
         .sidebar-minimized .nav-btn { justify-content: center; padding-left: 0; padding-right: 0; }
         .sidebar-minimized .nav-btn .material-symbols-outlined { margin: 0; font-size: 24px; }
         
+        .sidebar-minimized .sidebar-header-container { padding-left: 0; padding-right: 0; justify-content: center; }
+        .sidebar-minimized .sidebar-actions { flex-direction: column !important; gap: 12px; }
+
         .nav-btn { color: var(--text-main); border-left: 4px solid transparent; }
         .nav-btn:hover { color: var(--primary); background-color: var(--panel-light); }
         .nav-btn.active { background-color: var(--panel-light); color: var(--primary); border-left: 4px solid var(--primary); font-weight: 600; }
@@ -172,21 +170,17 @@
 </head>
 <body class="flex h-screen overflow-hidden flex-col md:flex-row relative">
 
-    <!-- Toast Container -->
     <div id="toast-container"></div>
 
-    <!-- Global Floating Fullscreen Config Modal -->
     <div id="fs-config-modal" class="floating-modal">
         <div class="flex justify-between items-center bg-[var(--panel-light)] p-2 px-3 border-b border-[var(--border)] cursor-pointer" onclick="this.parentElement.classList.toggle('minimized'); const ic = this.querySelector('.expand-icon'); ic.innerText = ic.innerText === 'expand_more' ? 'expand_less' : 'expand_more';">
             <span class="font-bold text-[var(--primary)] text-xs uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">tune</span> Config & Inspector</span>
             <span class="material-symbols-outlined text-[16px] text-[var(--text-light)] expand-icon">expand_more</span>
         </div>
         <div class="floating-modal-content flex flex-col gap-4" id="fs-config-content">
-            <!-- Content cloned via JS -->
-        </div>
+            </div>
     </div>
 
-    <!-- Hidden Slide Staging Area (for HTML2Canvas) -->
     <div id="slide-staging-area">
         <div id="slide-header">
             <div>
@@ -200,8 +194,7 @@
                 <div class="content" id="slide-inset-content"></div>
             </div>
             <div class="slide-visual-area" id="slide-visual">
-                <!-- SVG/Image injected dynamically -->
-            </div>
+                </div>
         </div>
         <div id="slide-footer">
             <div>CONFIDENTIAL - FOR INTERNAL ENABLEMENT ONLY</div>
@@ -209,7 +202,6 @@
         </div>
     </div>
 
-    <!-- Floating Metric Tooltip -->
     <div id="metric-floating-tooltip" class="fixed hidden z-50 bg-[var(--panel-bg)] border border-[var(--border)] shadow-2xl rounded-lg p-5 w-[350px] text-sm pointer-events-none transition-opacity duration-200 opacity-0">
         <h4 id="tt-metric-title" class="font-bold text-[15px] text-[var(--primary)] mb-1 pb-2 border-b border-[var(--border)]"></h4>
         <p id="tt-metric-desc" class="text-[var(--text-main)] mt-3 mb-2 text-[13px] leading-relaxed"></p>
@@ -221,7 +213,6 @@
         </ul>
     </div>
 
-    <!-- Mobile Header -->
     <div class="md:hidden flex flex-shrink-0 items-center justify-between bg-[var(--panel-bg)] p-4 border-b border-[var(--border)] z-20 shadow-sm">
         <div><h1 class="text-xl font-bold text-[var(--primary)]">ModelOp</h1></div>
         <div class="flex items-center gap-2">
@@ -235,14 +226,13 @@
 
     <div id="mobile-overlay" class="fixed inset-0 z-30 hidden md:hidden" onclick="window.toggleMobileMenu()"></div>
 
-    <!-- Sidebar Navigation -->
     <nav id="sidebar" class="sidebar-expanded fixed md:relative inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-in-out bg-[var(--panel-bg)] border-r border-[var(--border)] flex flex-col h-full z-40 shadow-xl md:shadow-none shrink-0 overflow-hidden">
-        <div class="p-6 pb-4 flex justify-between items-center whitespace-nowrap">
+        <div class="sidebar-header-container p-6 pb-4 flex justify-between items-center whitespace-nowrap">
             <div class="nav-header-text overflow-hidden">
                 <h1 class="text-2xl font-bold text-[var(--primary)] tracking-tight">ModelOp</h1>
                 <p class="text-[10px] uppercase tracking-widest font-bold text-[var(--text-light)] mt-1">Quickstart Guide</p>
             </div>
-            <div class="hidden md:flex items-center gap-1">
+            <div class="sidebar-actions hidden md:flex items-center gap-1">
                 <button onclick="window.exportCurrentSlide()" class="action-btn action-btn-outline text-[var(--primary)] border-[var(--primary)] px-2" title="Download Current View as PPT Slide PNG">
                     <span class="material-symbols-outlined text-[16px]">download</span>
                 </button>
@@ -295,11 +285,9 @@
         </div>
     </nav>
 
-    <!-- Main Content Area -->
     <main class="flex-1 h-full overflow-y-auto relative bg-[var(--bg-color)] flex flex-col" id="main-content-scroll">
         <div class="p-6 md:p-10 lg:p-12 flex-1 relative">
             
-            <!-- SECTION 1: Overview -->
             <section id="dashboard" class="page-section active max-w-4xl mx-auto">
                 <div class="mb-10">
                     <h2 class="text-3xl font-bold mb-4 tracking-tight">Bridging Standard Metrics & Enterprise Needs</h2>
@@ -326,7 +314,6 @@
                 </div>
             </section>
 
-            <!-- SECTION 2: Data Science Metrics Catalog -->
             <section id="catalog" class="page-section max-w-6xl mx-auto pb-10">
                 <div class="mb-10">
                     <h2 class="text-3xl font-bold mb-4 tracking-tight">Data Science Metrics Catalog</h2>
@@ -436,7 +423,6 @@
                 </div>
             </section>
             
-            <!-- SECTION 3: Selection Pathway -->
             <section id="pathway" class="page-section max-w-full mx-auto">
                 <div class="mb-8 max-w-6xl mx-auto">
                     <h2 class="text-3xl font-bold mb-4 tracking-tight">Enterprise Monitor Selection Pathway</h2>
@@ -444,7 +430,6 @@
                 </div>
                 
                 <div class="flex flex-col lg:flex-row gap-6 relative lg:h-[600px] w-full">
-                    <!-- Left: Node Inspector -->
                     <div class="w-full lg:w-80 flex flex-col gap-4 shrink-0 h-full card p-6" id="pathway-inspector-container">
                         <div class="flex justify-between items-center mb-3">
                             <h3 class="font-bold text-[var(--primary)] uppercase tracking-wider text-xs flex items-center gap-1">
@@ -462,7 +447,6 @@
                         </div>
                     </div>
 
-                    <!-- Middle: Canvas -->
                     <div class="card flex-1 flex flex-col min-h-[500px] lg:min-h-0 h-full overflow-hidden bg-[var(--panel-light)] border-[var(--border)] relative" id="pathway-card-container">
                         <button onclick="window.toggleFullscreen('pathway-card-container', 'pathway-inspector-container', 'pathway-filters-container')" class="absolute top-4 right-4 z-20 bg-[var(--panel-bg)] border border-[var(--border)] p-1.5 rounded hover:text-[var(--primary)] text-[var(--text-light)] shadow-sm transition-colors"><span class="material-symbols-outlined text-[18px]">fullscreen</span></button>
                         <div id="pathway-canvas" class="zoom-pan-wrapper w-full h-full">
@@ -470,7 +454,6 @@
                         </div>
                     </div>
 
-                    <!-- Right: Filters -->
                     <div class="w-full lg:w-72 flex flex-col gap-4 shrink-0 h-full card p-6" id="pathway-filters-container">
                         <div class="flex justify-between items-center mb-3">
                             <h3 class="font-bold text-[var(--primary)] uppercase tracking-wider text-xs flex items-center gap-1">
@@ -513,7 +496,6 @@
                 </div>
             </section>
 
-            <!-- SECTION 4: ERD Architecture -->
             <section id="architecture" class="page-section max-w-6xl mx-auto">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
                     <div>
@@ -526,7 +508,6 @@
                     </div>
                 </div>
 
-                <!-- Standard ERD Canvas -->
                 <div id="arch-standard-container" class="flex flex-col lg:flex-row gap-8 relative lg:h-[600px]">
                     <div class="w-full lg:w-80 flex flex-col gap-4 shrink-0 h-full" id="arch-controls">
                         <div class="card p-6 h-full flex flex-col min-h-[300px] lg:min-h-0">
@@ -563,7 +544,6 @@
                     </div>
                 </div>
 
-                <!-- Agentic Viz.js Canvas -->
                 <div id="arch-agentic-container" class="hidden flex-col lg:flex-row gap-8 transition-all relative lg:h-[600px]">
                     <div class="w-full lg:w-80 flex flex-col gap-4 shrink-0 h-full" id="agentic-controls">
                         <div class="card p-6 h-full flex flex-col min-h-[300px] lg:min-h-0">
@@ -599,7 +579,6 @@
                 </div>
             </section>
 
-            <!-- SECTION 5: Artifact Explorer -->
             <section id="artifacts" class="page-section max-w-6xl mx-auto">
                 <div class="mb-10">
                     <h2 class="text-3xl font-bold mb-4 tracking-tight">Artifact Explorer & Generator</h2>
@@ -645,7 +624,6 @@
                 </div>
             </section>
 
-            <!-- SECTION 6: Deployment -->
             <section id="deployment" class="page-section max-w-4xl mx-auto">
                 <div class="mb-10">
                     <h2 class="text-3xl font-bold mb-4 tracking-tight">Onboarding Roadmap</h2>
@@ -889,7 +867,6 @@
             const insetContent = document.getElementById('slide-inset-content');
             const visualArea = document.getElementById('slide-visual');
             
-            // Sync Theme Colors to Staging Area explicitly
             if (window.isDarkMode) {
                 stagingArea.style.background = '#141414';
                 stagingArea.style.color = '#e5e7eb';
@@ -998,17 +975,18 @@
             }
             
             const clonedSvg = svgElement.cloneNode(true);
+            const rootG = clonedSvg.querySelector('g');
+            if (rootG) rootG.removeAttribute('transform'); // strip pan/zoom offsets
             
-            // Clean up dynamic styles applied by pan/zoom
-            clonedSvg.style.transform = ''; 
-            clonedSvg.style.width = '100%';
-            clonedSvg.style.height = '100%';
+            // Explicitly set pixel dimensions for the clone so it renders in HTML5 Canvas perfectly
+            const bbox = svgElement.getBoundingClientRect();
+            clonedSvg.setAttribute('width', `${bbox.width}px`);
+            clonedSvg.setAttribute('height', `${bbox.height}px`);
+            clonedSvg.style.width = `${bbox.width}px`;
+            clonedSvg.style.height = `${bbox.height}px`;
             clonedSvg.style.maxWidth = '100%';
             clonedSvg.style.maxHeight = '100%';
-            
-            // Remove hardcoded width/height attributes so viewBox scales it inside the flex container correctly
-            clonedSvg.removeAttribute('width');
-            clonedSvg.removeAttribute('height');
+            clonedSvg.style.transform = '';
             
             // Clean text/stroke colors for slide environment mapping
             if(window.isDarkMode) {
@@ -1024,14 +1002,51 @@
                 });
             }
 
-            // Directly append the raw cloned <svg> DOM node into the staging area
-            visualArea.innerHTML = '';
-            visualArea.appendChild(clonedSvg);
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(clonedSvg);
             
-            // Wait for the layout to paint, and then trigger the canvas capture natively
-            setTimeout(() => {
-                window.triggerHtml2Canvas();
-            }, 500);
+            if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+            
+            const encodedData = encodeURIComponent(source);
+            const img = new Image();
+            
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const scale = 2; // High-res export
+                canvas.width = bbox.width * scale;
+                canvas.height = bbox.height * scale;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = window.isDarkMode ? '#141414' : '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Scale up the drawing context and draw the image
+                ctx.scale(scale, scale);
+                ctx.drawImage(img, 0, 0, bbox.width, bbox.height);
+                
+                // Convert the flattened canvas to a standard Base64 PNG string
+                const pngData = canvas.toDataURL('image/png');
+                
+                // Inject the standard PNG into the visual area so html2canvas sees a normal image
+                const finalImg = new Image();
+                finalImg.src = pngData;
+                finalImg.style.maxWidth = '100%';
+                finalImg.style.maxHeight = '100%';
+                finalImg.style.objectFit = 'contain';
+                
+                visualArea.innerHTML = '';
+                visualArea.appendChild(finalImg);
+                
+                setTimeout(() => window.triggerHtml2Canvas(), 100);
+            };
+            
+            img.onerror = (err) => {
+                console.error("SVG to Canvas rendering failed", err);
+                window.showToast("SVG export failed.", "error");
+            };
+
+            img.src = `data:image/svg+xml;charset=utf-8,${encodedData}`;
         };
 
         window.triggerHtml2Canvas = function() {
