@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ModelOp Custom Monitor Quickstart Guide</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Viz.js (Graphviz) for ERD and Pathways -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/viz.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/full.render.js"></script>
+    <!-- HTML2Canvas for Slide Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+    <!-- Google Fonts & Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 
@@ -170,17 +175,41 @@
 </head>
 <body class="flex h-screen overflow-hidden flex-col md:flex-row relative">
 
+    <!-- Toast Container -->
     <div id="toast-container"></div>
 
+    <!-- Global Floating Fullscreen Config Modal -->
     <div id="fs-config-modal" class="floating-modal">
         <div class="flex justify-between items-center bg-[var(--panel-light)] p-2 px-3 border-b border-[var(--border)] cursor-pointer" onclick="this.parentElement.classList.toggle('minimized'); const ic = this.querySelector('.expand-icon'); ic.innerText = ic.innerText === 'expand_more' ? 'expand_less' : 'expand_more';">
             <span class="font-bold text-[var(--primary)] text-xs uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">tune</span> Config & Inspector</span>
             <span class="material-symbols-outlined text-[16px] text-[var(--text-light)] expand-icon">expand_more</span>
         </div>
         <div class="floating-modal-content flex flex-col gap-4" id="fs-config-content">
-            </div>
+            <!-- Content cloned via JS -->
+        </div>
     </div>
 
+    <!-- Fallback Download Modal for Iframes -->
+    <div id="download-fallback-modal" class="fixed inset-0 z-[100000] hidden items-center justify-center bg-black/80 p-4 lg:p-10 transition-opacity">
+        <div class="bg-[var(--panel-bg)] rounded-xl p-6 w-full max-w-5xl flex flex-col shadow-2xl h-[90vh]">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-[var(--text-main)] flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[var(--primary)]">file_download</span> Download Ready
+                    </h3>
+                    <p class="text-sm text-[var(--text-light)] mt-1">Right-click the image below and select <b>"Save Image As..."</b> to copy it.</p>
+                </div>
+                <button onclick="document.getElementById('download-fallback-modal').classList.replace('flex', 'hidden')" class="text-[var(--text-light)] hover:text-[var(--text-main)] transition-colors">
+                    <span class="material-symbols-outlined text-3xl">close</span>
+                </button>
+            </div>
+            <div class="overflow-auto flex-1 border-2 border-dashed border-[var(--border)] rounded-lg flex items-center justify-center bg-[var(--panel-light)] p-4">
+                <img id="fallback-download-img" src="" alt="Generated Slide" class="max-w-full h-auto object-contain shadow-md" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Slide Staging Area (for HTML2Canvas) -->
     <div id="slide-staging-area">
         <div id="slide-header">
             <div>
@@ -194,7 +223,8 @@
                 <div class="content" id="slide-inset-content"></div>
             </div>
             <div class="slide-visual-area" id="slide-visual">
-                </div>
+                <!-- SVG/Image injected dynamically -->
+            </div>
         </div>
         <div id="slide-footer">
             <div>CONFIDENTIAL - FOR INTERNAL ENABLEMENT ONLY</div>
@@ -202,6 +232,7 @@
         </div>
     </div>
 
+    <!-- Floating Metric Tooltip -->
     <div id="metric-floating-tooltip" class="fixed hidden z-50 bg-[var(--panel-bg)] border border-[var(--border)] shadow-2xl rounded-lg p-5 w-[350px] text-sm pointer-events-none transition-opacity duration-200 opacity-0">
         <h4 id="tt-metric-title" class="font-bold text-[15px] text-[var(--primary)] mb-1 pb-2 border-b border-[var(--border)]"></h4>
         <p id="tt-metric-desc" class="text-[var(--text-main)] mt-3 mb-2 text-[13px] leading-relaxed"></p>
@@ -213,6 +244,7 @@
         </ul>
     </div>
 
+    <!-- Mobile Header -->
     <div class="md:hidden flex flex-shrink-0 items-center justify-between bg-[var(--panel-bg)] p-4 border-b border-[var(--border)] z-20 shadow-sm">
         <div><h1 class="text-xl font-bold text-[var(--primary)]">ModelOp</h1></div>
         <div class="flex items-center gap-2">
@@ -226,6 +258,7 @@
 
     <div id="mobile-overlay" class="fixed inset-0 z-30 hidden md:hidden" onclick="window.toggleMobileMenu()"></div>
 
+    <!-- Sidebar Navigation -->
     <nav id="sidebar" class="sidebar-expanded fixed md:relative inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-in-out bg-[var(--panel-bg)] border-r border-[var(--border)] flex flex-col h-full z-40 shadow-xl md:shadow-none shrink-0 overflow-hidden">
         <div class="sidebar-header-container p-6 pb-4 flex justify-between items-center whitespace-nowrap">
             <div class="nav-header-text overflow-hidden">
@@ -285,9 +318,11 @@
         </div>
     </nav>
 
+    <!-- Main Content Area -->
     <main class="flex-1 h-full overflow-y-auto relative bg-[var(--bg-color)] flex flex-col" id="main-content-scroll">
         <div class="p-6 md:p-10 lg:p-12 flex-1 relative">
             
+            <!-- SECTION 1: Overview -->
             <section id="dashboard" class="page-section active max-w-4xl mx-auto">
                 <div class="mb-10">
                     <h2 class="text-3xl font-bold mb-4 tracking-tight">Bridging Standard Metrics & Enterprise Needs</h2>
@@ -314,6 +349,7 @@
                 </div>
             </section>
 
+            <!-- SECTION 2: Data Science Metrics Catalog -->
             <section id="catalog" class="page-section max-w-6xl mx-auto pb-10">
                 <div class="mb-10">
                     <h2 class="text-3xl font-bold mb-4 tracking-tight">Data Science Metrics Catalog</h2>
@@ -423,6 +459,7 @@
                 </div>
             </section>
             
+            <!-- SECTION 3: Selection Pathway -->
             <section id="pathway" class="page-section max-w-full mx-auto">
                 <div class="mb-8 max-w-6xl mx-auto">
                     <h2 class="text-3xl font-bold mb-4 tracking-tight">Enterprise Monitor Selection Pathway</h2>
@@ -496,6 +533,7 @@
                 </div>
             </section>
 
+            <!-- SECTION 4: ERD Architecture -->
             <section id="architecture" class="page-section max-w-6xl mx-auto">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
                     <div>
@@ -508,6 +546,7 @@
                     </div>
                 </div>
 
+                <!-- Standard ERD Canvas -->
                 <div id="arch-standard-container" class="flex flex-col lg:flex-row gap-8 relative lg:h-[600px]">
                     <div class="w-full lg:w-80 flex flex-col gap-4 shrink-0 h-full" id="arch-controls">
                         <div class="card p-6 h-full flex flex-col min-h-[300px] lg:min-h-0">
@@ -544,6 +583,7 @@
                     </div>
                 </div>
 
+                <!-- Agentic Viz.js Canvas -->
                 <div id="arch-agentic-container" class="hidden flex-col lg:flex-row gap-8 transition-all relative lg:h-[600px]">
                     <div class="w-full lg:w-80 flex flex-col gap-4 shrink-0 h-full" id="agentic-controls">
                         <div class="card p-6 h-full flex flex-col min-h-[300px] lg:min-h-0">
@@ -579,6 +619,7 @@
                 </div>
             </section>
 
+            <!-- SECTION 5: Artifact Explorer -->
             <section id="artifacts" class="page-section max-w-6xl mx-auto">
                 <div class="mb-10">
                     <h2 class="text-3xl font-bold mb-4 tracking-tight">Artifact Explorer & Generator</h2>
@@ -624,6 +665,7 @@
                 </div>
             </section>
 
+            <!-- SECTION 6: Deployment -->
             <section id="deployment" class="page-section max-w-4xl mx-auto">
                 <div class="mb-10">
                     <h2 class="text-3xl font-bold mb-4 tracking-tight">Onboarding Roadmap</h2>
@@ -867,6 +909,7 @@
             const insetContent = document.getElementById('slide-inset-content');
             const visualArea = document.getElementById('slide-visual');
             
+            // Sync Theme Colors to Staging Area explicitly
             if (window.isDarkMode) {
                 stagingArea.style.background = '#141414';
                 stagingArea.style.color = '#e5e7eb';
@@ -895,7 +938,6 @@
 
             const activeTab = document.querySelector('.page-section.active').id;
             visualArea.innerHTML = '';
-            let targetSVG = null;
             
             if (activeTab === 'dashboard') {
                 insetTitle.innerText = "Value Proposition";
@@ -921,22 +963,20 @@
                 const info = window.generateSlideContentFromNodes(window.selectedNodesPathway, window.pathwayDetails, "Selection Pathway", "Selecting the right AI monitor requires mapping the technical model type and data characteristics directly to enterprise business outcomes.", "#pathway-canvas");
                 insetTitle.innerText = info.title;
                 insetContent.innerHTML = info.content; 
-                targetSVG = document.querySelector('#pathway-canvas svg');
-                window.processSVGForSlide(targetSVG, visualArea);
+                window.processSVGForSlide(document.querySelector('#pathway-canvas svg'), visualArea);
             }
             else if (activeTab === 'architecture') {
                 if (!document.getElementById('arch-standard-container').classList.contains('hidden')) {
                     const info = window.generateSlideContentFromNodes(window.selectedNodesErd, window.erdDetails, "Execution Architecture", "Orchestration combines Business Model context, Monitor assets, and Data references.", "#erd-canvas");
                     insetTitle.innerText = info.title;
                     insetContent.innerHTML = info.content;
-                    targetSVG = document.querySelector('#erd-canvas svg');
+                    window.processSVGForSlide(document.querySelector('#erd-canvas svg'), visualArea);
                 } else {
                     const info = window.generateSlideContentFromNodes(window.selectedNodesAgentic, window.agenticErdDetails, "Agentic Architecture", "Orchestration of Foundation Models, Tooling, and continuous telemetry monitoring.", "#erd-agentic-canvas");
                     insetTitle.innerText = info.title;
                     insetContent.innerHTML = info.content;
-                    targetSVG = document.querySelector('#erd-agentic-canvas svg');
+                    window.processSVGForSlide(document.querySelector('#erd-agentic-canvas svg'), visualArea);
                 }
-                window.processSVGForSlide(targetSVG, visualArea);
             }
             else if (activeTab === 'artifacts') {
                 insetTitle.innerText = "Monitor Artifacts";
@@ -975,18 +1015,29 @@
             }
             
             const clonedSvg = svgElement.cloneNode(true);
-            const rootG = clonedSvg.querySelector('g');
-            if (rootG) rootG.removeAttribute('transform'); // strip pan/zoom offsets
             
-            // Explicitly set pixel dimensions for the clone so it renders in HTML5 Canvas perfectly
-            const bbox = svgElement.getBoundingClientRect();
-            clonedSvg.setAttribute('width', `${bbox.width}px`);
-            clonedSvg.setAttribute('height', `${bbox.height}px`);
-            clonedSvg.style.width = `${bbox.width}px`;
-            clonedSvg.style.height = `${bbox.height}px`;
+            // Clean up dynamic styles applied by pan/zoom (DO NOT strip the Graphviz <g> transform)
+            clonedSvg.style.transform = ''; 
+            clonedSvg.style.width = '100%';
+            clonedSvg.style.height = '100%';
             clonedSvg.style.maxWidth = '100%';
             clonedSvg.style.maxHeight = '100%';
-            clonedSvg.style.transform = '';
+            
+            // Extract the intrinsic dimensions from the Graphviz viewBox
+            let svgWidth = 800;
+            let svgHeight = 600;
+            const viewBox = clonedSvg.getAttribute('viewBox');
+            if (viewBox) {
+                const parts = viewBox.split(' ');
+                if (parts.length === 4) {
+                    svgWidth = parseFloat(parts[2]);
+                    svgHeight = parseFloat(parts[3]);
+                }
+            }
+            
+            // Explicitly set pixel dimensions for the clone so html2canvas renders it instead of ignoring it
+            clonedSvg.setAttribute('width', `${svgWidth}px`);
+            clonedSvg.setAttribute('height', `${svgHeight}px`);
             
             // Clean text/stroke colors for slide environment mapping
             if(window.isDarkMode) {
@@ -1002,72 +1053,48 @@
                 });
             }
 
-            const serializer = new XMLSerializer();
-            let source = serializer.serializeToString(clonedSvg);
+            // Directly append the raw cloned <svg> DOM node into the staging area
+            visualArea.innerHTML = '';
+            visualArea.appendChild(clonedSvg);
             
-            if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-            if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
-            
-            const encodedData = encodeURIComponent(source);
-            const img = new Image();
-            
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const scale = 2; // High-res export
-                canvas.width = bbox.width * scale;
-                canvas.height = bbox.height * scale;
-                
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = window.isDarkMode ? '#141414' : '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Scale up the drawing context and draw the image
-                ctx.scale(scale, scale);
-                ctx.drawImage(img, 0, 0, bbox.width, bbox.height);
-                
-                // Convert the flattened canvas to a standard Base64 PNG string
-                const pngData = canvas.toDataURL('image/png');
-                
-                // Inject the standard PNG into the visual area so html2canvas sees a normal image
-                const finalImg = new Image();
-                finalImg.src = pngData;
-                finalImg.style.maxWidth = '100%';
-                finalImg.style.maxHeight = '100%';
-                finalImg.style.objectFit = 'contain';
-                
-                visualArea.innerHTML = '';
-                visualArea.appendChild(finalImg);
-                
-                setTimeout(() => window.triggerHtml2Canvas(), 100);
-            };
-            
-            img.onerror = (err) => {
-                console.error("SVG to Canvas rendering failed", err);
-                window.showToast("SVG export failed.", "error");
-            };
-
-            img.src = `data:image/svg+xml;charset=utf-8,${encodedData}`;
+            // Wait for the layout to paint, and then trigger the canvas capture
+            setTimeout(() => {
+                window.triggerHtml2Canvas();
+            }, 300);
         };
 
         window.triggerHtml2Canvas = function() {
             window.showToast("Generating slide...");
-            requestAnimationFrame(() => {
+            
+            // Wait for any appended elements (like SVG) to paint
+            setTimeout(() => {
                 html2canvas(document.getElementById('slide-staging-area'), {
                     scale: 2,
                     backgroundColor: window.isDarkMode ? '#141414' : '#ffffff',
                     logging: false,
                     useCORS: true
                 }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = 'ModelOp_Slide.png';
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                    window.showToast("Slide downloaded successfully!");
+                    const dataUrl = canvas.toDataURL('image/png');
+                    
+                    const inIframe = window.self !== window.top;
+                    
+                    if (inIframe) {
+                        document.getElementById('fallback-download-img').src = dataUrl;
+                        document.getElementById('download-fallback-modal').classList.remove('hidden');
+                        document.getElementById('download-fallback-modal').classList.add('flex');
+                        window.showToast("Slide generated! Please save manually.");
+                    } else {
+                        const link = document.createElement('a');
+                        link.download = 'ModelOp_Slide.png';
+                        link.href = dataUrl;
+                        link.click();
+                        window.showToast("Slide downloaded successfully!");
+                    }
                 }).catch(err => {
                     console.error('Slide generation error:', err);
                     window.showToast("Failed to generate slide.", "error");
                 });
-            });
+            }, 100);
         };
 
         // --- Interaction Logic: Tooltips, Zoom, Fullscreen ---
